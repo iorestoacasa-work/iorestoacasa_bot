@@ -1,6 +1,9 @@
 import logging
+
 from telegram import ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+
+from utils import get_server_list
 from settings import TOKEN
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -27,6 +30,17 @@ def info(update, context):
                                 "[beFair](befair.it).\nOltre a loro ci sono altri che hanno contribuito!\n" \
                                 "Puoi trovare la lista completa ed aggiornata "\
                                 "[qua](https://iorestoacasa.work/crediti.html) 💪", parse_mode=ParseMode.MARKDOWN)
+
+def server_list(update, context):
+    """Return the available server list"""
+    msg = "Eccola la lista dei server disponibili:\n\n"
+
+    for server in get_server_list():
+        msg += f"🖥 [{server['name']}]({server['url']})\n"
+        msg += f"❤️ *Offerto da*: [{server['by']}]({server['by_url']})\n"
+        msg += f"👥 *Utenti connessi*: {server['user_count']}\n\n"
+
+    update.message.reply_text(msg, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
 def add_group(update, context):
     """Send message to new group members"""
@@ -55,6 +69,7 @@ def main():
 
     # Register handlers
     dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("servers", server_list))
     dp.add_handler(CommandHandler("contribute", contribute))
     dp.add_handler(CommandHandler("info", info))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, add_group))

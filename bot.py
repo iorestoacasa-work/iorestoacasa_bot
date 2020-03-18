@@ -35,10 +35,14 @@ def server_list(update, context):
     """Return the available server list"""
     msg = "Eccola la lista dei server disponibili:\n\n"
 
-    for server in get_server_list():
+    # Order server list
+    server_list = sorted(get_server_list(), key=lambda k: k['cpu_usage'])
+
+    for server in server_list:
         msg += f"🖥 [{server['name']}]({server['url']})\n"
         msg += f"❤️ *Offerto da*: [{server['by']}]({server['by_url']})\n"
-        msg += f"👥 *Utenti connessi*: {server['user_count']}\n\n"
+        msg += f"👥 *Utenti connessi*: {server['user_count']}\n"
+        msg += f"📶 *Carico*: {int(server['cpu_usage']*100)}%\n\n"
 
     update.message.reply_text(msg, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 

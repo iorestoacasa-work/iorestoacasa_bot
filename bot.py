@@ -1,6 +1,4 @@
 import logging
-import threading
-import time
 
 import telegram.error as tg_error
 from telegram import ParseMode
@@ -14,12 +12,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-lock = threading.Lock()
-
-# Messages (IDs) that need to be deleted
-delete_queue = []
-delete_timeout = 0
-should_clean = True
+# Keep track of last message sent
+last_welcome_msg = None
 
 
 def start(update, context):
@@ -53,31 +47,43 @@ def server_list(update, context):
 
 def add_group(update, context):
     """Send message to new group members"""
-    global delete_queue
-    global delete_timeout
-    global lock
+    global last_welcome_msg
 
     for member in update.message.new_chat_members:
-        msg = update.message.reply_text(f"Ciao *{member.username}*! Benvenuto nel gruppo di supporto😁\n" \
-                                         "Se vuoi contribuire al progetto consulta questa " \
-                                         "[pagina](https://iorestoacasa.work/voglio-contribuire.html) o le " \
-                                         "[issues](https://github.com/iorestoacasa-work/iorestoacasa.work/issues) " \
-                                         "presenti su GitHub.\n\nSe invece hai bisogno di aiuto scrivi pure qua, " \
-                                         "qualcuno in questo gruppo sicuramente ti saprà aiutare🛠",
-                                         parse_mode=ParseMode.MARKDOWN,
-                                         disable_web_page_preview=True)
+        # Delete last msg
+        if last_welcome_msg:
+            last_welcome_msg.delete()
 
-        # Put message in delete queue (2 min timeout)
-        with lock:
-            delete_queue.append(msg)
-            delete_timeout = 2
+        # Send new!
+        last_welcome_msg = update.message.reply_text(f"Ciao *{member.username}*! Benvenuto nel gruppo di supporto😁\n" \
+                                                      "Se vuoi contribuire al progetto consulta questa " \
+                                                      "[pagina](https://iorestoacasa.work/voglio-contribuire.html) o le " \
+                                                      "[issues](https://github.com/iorestoacasa-work/iorestoacasa.work/issues) " \
+                                                      "presenti su GitHub.\n\nSe invece hai bisogno di aiuto scrivi pure qua, " \
+                                                      "qualcuno in questo gruppo sicuramente ti saprà aiutare🛠",
+                                                      parse_mode=ParseMode.MARKDOWN,
+                                                      disable_web_page_preview=True)
 
 def error(update, context):
     """Log errors caused by updates"""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
+def change_page(update, context):
+    """Callback for page change on server list"""
+    query = update.callback_query
+
+    msg, reply_markup = prepare_server_list(int(query.data))
+    query.edit_message_text(text=msg,
+                            reply_markup=reply_markup,
+                            parse_mode=ParseMode.MARKDOWN,
+                            disable_web_page_preview=True)
+
 def prepare_server_list(page=0):
-    """Return the available server list"""
+    """
+    Prepare server list message and keyboard
+
+    :param page: Page to be shown
+    """
     msg = "Eccola la lista dei server disponibili:\n\n"
 
     # Order server list
@@ -110,42 +116,7 @@ def prepare_server_list(page=0):
 
     return msg, reply_markup
 
-def change_page(update, context):
-    """Callback for page change on server list"""
-    query = update.callback_query
-
-    msg, reply_markup = prepare_server_list(int(query.data))
-    query.edit_message_text(text=msg,
-                            reply_markup=reply_markup,
-                            parse_mode=ParseMode.MARKDOWN,
-                            disable_web_page_preview=True)
-
-def clean_msg():
-    """Periodically clean old message"""
-    global delete_queue
-    global delete_timeout
-    global lock
-    global should_clean
-
-    while should_clean:
-        with lock:
-            if delete_timeout > 0:
-                delete_timeout -= 1
-            else:
-                for msg in delete_queue:
-                    try:
-                        msg.delete()
-                    except tg_error.BadRequest:
-                        pass
-
-        time.sleep(60)
-
 def main():
-    global delete_queue
-    global delete_timeout
-    global lock
-    global should_clean
-
     """Starts the bot"""
     print("Starting bot :D")
 
@@ -166,19 +137,9 @@ def main():
     # Register error handler
     dp.add_error_handler(error)
 
-    # Cleaning thread
-    cleaner = threading.Thread(target=clean_msg)
-    cleaner.start()
-
     # Start the Bot
     updater.start_polling()
     updater.idle()
-
-    # Wait for thread
-    should_clean = False
-    if cleaner.is_alive():
-        cleaner.join()
-
 
 if __name__ == '__main__':
     main()

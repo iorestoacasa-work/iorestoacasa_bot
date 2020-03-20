@@ -84,16 +84,16 @@ def prepare_server_list(page=0):
 
     :param page: Page to be shown
     """
-    msg = "Eccola la lista dei server disponibili:\n\n"
+    msg = "🛠 *Server disponibili* 🛠\n\n"
 
     # Order server list
     server_list = sorted(get_server_list(), key=lambda k: k['cpu_usage'])
 
     for server in server_list[(page*5):(page*5+5)]:
-        msg += f"🖥 [{server['name']}]({server['url']})\n"
+        msg += f"🔌 [{server['name']}]({server['url']})\n"
         msg += f"❤️ *Offerto da*: [{server['by']}]({server['by_url']})\n"
-        msg += f"👥 *Utenti connessi*: {server['user_count']}\n"
-        msg += f"📶 *Carico*: {int(server['cpu_usage']*100)}%\n\n"
+        msg += f"👩🏻‍💻 *Utenti connessi*: {server['user_count']}\n"
+        msg += f"⚙️ *Carico*: {int(server['cpu_usage']*100)}%\n\n"
 
     msg += f"📖 *Pagina*: {page+1}"
 

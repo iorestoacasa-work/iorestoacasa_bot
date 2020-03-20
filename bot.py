@@ -4,7 +4,8 @@ import time
 
 import telegram.error as tg_error
 from telegram import ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackQueryHandler, CommandHandler, Filters, MessageHandler, Updater
 
 from utils import get_server_list
 from settings import TOKEN
@@ -43,18 +44,12 @@ def info(update, context):
 
 def server_list(update, context):
     """Return the available server list"""
-    msg = "Eccola la lista dei server disponibili:\n\n"
+    msg, reply_markup = prepare_server_list()
 
-    # Order server list
-    server_list = sorted(get_server_list(), key=lambda k: k['cpu_usage'])
-
-    for server in server_list:
-        msg += f"🖥 [{server['name']}]({server['url']})\n"
-        msg += f"❤️ *Offerto da*: [{server['by']}]({server['by_url']})\n"
-        msg += f"👥 *Utenti connessi*: {server['user_count']}\n"
-        msg += f"📶 *Carico*: {int(server['cpu_usage']*100)}%\n\n"
-
-    update.message.reply_text(msg, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+    update.message.reply_text(msg,
+                              reply_markup=reply_markup,
+                              parse_mode=ParseMode.MARKDOWN,
+                              disable_web_page_preview=True)
 
 def add_group(update, context):
     """Send message to new group members"""
@@ -80,6 +75,50 @@ def add_group(update, context):
 def error(update, context):
     """Log errors caused by updates"""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
+
+def prepare_server_list(page=0):
+    """Return the available server list"""
+    msg = "Eccola la lista dei server disponibili:\n\n"
+
+    # Order server list
+    server_list = sorted(get_server_list(), key=lambda k: k['cpu_usage'])
+
+    for server in server_list[(page*5):(page*5+5)]:
+        msg += f"🖥 [{server['name']}]({server['url']})\n"
+        msg += f"❤️ *Offerto da*: [{server['by']}]({server['by_url']})\n"
+        msg += f"👥 *Utenti connessi*: {server['user_count']}\n"
+        msg += f"📶 *Carico*: {int(server['cpu_usage']*100)}%\n\n"
+
+    msg += f"📖 *Pagina*: {page+1}"
+
+    # Create a inline keyboard based on current page
+    if page == 0:
+        keyboard = [[
+            InlineKeyboardButton("➡️", callback_data=page+1)
+        ]]
+    elif ((page+1)*5) >= len(server_list):
+        keyboard = [[
+            InlineKeyboardButton("⬅️", callback_data=page-1),
+        ]]
+    else:
+        keyboard = [[
+            InlineKeyboardButton("⬅️", callback_data=page-1),
+            InlineKeyboardButton("➡️", callback_data=page+1)
+        ]]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    return msg, reply_markup
+
+def change_page(update, context):
+    """Callback for page change on server list"""
+    query = update.callback_query
+
+    msg, reply_markup = prepare_server_list(int(query.data))
+    query.edit_message_text(text=msg,
+                            reply_markup=reply_markup,
+                            parse_mode=ParseMode.MARKDOWN,
+                            disable_web_page_preview=True)
 
 def clean_msg():
     """Periodically clean old message"""
@@ -122,6 +161,7 @@ def main():
     dp.add_handler(CommandHandler("contribute", contribute))
     dp.add_handler(CommandHandler("info", info))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, add_group))
+    dp.add_handler(CallbackQueryHandler(change_page))
 
     # Register error handler
     dp.add_error_handler(error)

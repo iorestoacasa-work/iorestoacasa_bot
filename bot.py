@@ -55,7 +55,7 @@ def add_group(update, context):
             last_welcome_msg.delete()
 
         # Send new!
-        last_welcome_msg = update.message.reply_text(f"Ciao *{member.username}*! Benvenuto nel gruppo di supporto😁\n" \
+        last_welcome_msg = update.message.reply_text(f"Ciao *{member.name}*! Benvenuto nel gruppo di supporto😁\n" \
                                                       "Se vuoi contribuire al progetto consulta questa " \
                                                       "[pagina](https://iorestoacasa.work/voglio-contribuire.html) o le " \
                                                       "[issues](https://github.com/iorestoacasa-work/iorestoacasa.work/issues) " \

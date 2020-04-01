@@ -86,7 +86,11 @@ def prepare_server_list(page=0):
     """
     msg = "🛠 *Server disponibili* 🛠\n\n"
 
+    # Order instances by usage
     server_list = sorted(get_server_list(), key=lambda k: k.get('cpu_usage', -1))
+
+    # Order instances by type (MM first)
+    server_list = sorted(server_list, key=lambda k: (1 if k.get('software') != "MM" else -1))
 
     for server in server_list[(page*5):(page*5+5)]:
         # Check server type

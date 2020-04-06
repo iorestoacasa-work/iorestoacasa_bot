@@ -18,23 +18,31 @@ last_welcome_msg = None
 
 def start(update, context):
     """Send starting message"""
-    update.message.reply_text(f"Ciao! Sono il bot di supporto🤖\nConsulta il menù " \
-                               "delle azioni per sapere cosa posso fare per te!")
+    update.message.reply_text("Ciao! Sono il bot di supporto🤖\nConsulta il menù " \
+                              "delle azioni per sapere cosa posso fare per te!")
 
 def contribute(update, context):
     """Send some links"""
-    update.message.reply_text(f"Se vuoi contribuire al progetto consulta questa " \
-                               "[pagina](https://iorestoacasa.work/voglio-contribuire.html) o le " \
-                               "[issues](https://github.com/iorestoacasa-work/iorestoacasa.work/issues) " \
-                               "presenti su GitHub 🖥", parse_mode=ParseMode.MARKDOWN)
+    update.message.reply_text("Se vuoi contribuire al progetto consulta questa " \
+                              "[pagina](https://iorestoacasa.work/voglio-contribuire.html) o le " \
+                              "[issues](https://github.com/iorestoacasa-work/iorestoacasa.work/issues) " \
+                              "presenti su GitHub 🖥", parse_mode=ParseMode.MARKDOWN)
 
 def info(update, context):
     """Send infoz about project"""
-    update.message.reply_text(f"Questo progetto è stato realizzato dall'associazione " \
-                               "[PDP Free Software User Group](pdp.linux.it) in collaborazione con " \
-                               "[beFair](befair.it).\nOltre a loro ci sono altri che hanno contribuito!\n" \
-                               "Puoi trovare la lista completa ed aggiornata "\
-                               "[qua](https://iorestoacasa.work/crediti.html) 💪", parse_mode=ParseMode.MARKDOWN)
+    update.message.reply_text("Questo progetto è stato realizzato dall'associazione " \
+                              "[PDP Free Software User Group](pdp.linux.it) in collaborazione con " \
+                              "[beFair](befair.it).\nOltre a loro ci sono altri che hanno contribuito!\n" \
+                              "Puoi trovare la lista completa ed aggiornata "\
+                              "[qua](https://iorestoacasa.work/crediti.html) 💪", parse_mode=ParseMode.MARKDOWN)
+
+def chats(update, context):
+    """Send links to all chats"""
+    update.message.reply_text("🛠 *Chat di supporto*: [link](https://t.me/iorestoacasawork)\n" \
+                              "🧠 *Chat offtopic*: [link](https://t.me/iorestoacasaworkofftopic)\n" \
+                              "📰 *Canale news*: [link](https://t.me/iorestoacasaworknews)",
+                              parse_mode=ParseMode.MARKDOWN,
+                              disable_web_page_preview=True)
 
 def server_list(update, context):
     """Return the available server list"""
@@ -59,8 +67,9 @@ def add_group(update, context):
                                                       "Se vuoi contribuire al progetto consulta questa " \
                                                       "[pagina](https://iorestoacasa.work/voglio-contribuire.html) o le " \
                                                       "[issues](https://github.com/iorestoacasa-work/iorestoacasa.work/issues) " \
-                                                      "presenti su GitHub.\n\nSe invece hai bisogno di aiuto scrivi pure qua, " \
-                                                      "qualcuno in questo gruppo sicuramente ti saprà aiutare🛠",
+                                                      "presenti su GitHub.\n\nSe invece hai bisogno di aiuto scrivi pure qua " \
+                                                      "o nella chat [off-topic](https://t.me/iorestoacasaworkofftopic).\n"
+                                                      "Qualcuno ti saprà sicuramente aiutare!🛠",
                                                       parse_mode=ParseMode.MARKDOWN,
                                                       disable_web_page_preview=True)
 
@@ -146,6 +155,7 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("servers", server_list))
     dp.add_handler(CommandHandler("contribute", contribute))
+    dp.add_handler(CommandHandler("chats", chats))
     dp.add_handler(CommandHandler("info", info))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, add_group))
     dp.add_handler(CallbackQueryHandler(change_page))

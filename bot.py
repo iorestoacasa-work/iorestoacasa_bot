@@ -93,13 +93,13 @@ def prepare_server_list(page=0):
 
     :param page: Page to be shown
     """
-    msg = "🛠 *Server disponibili* 🛠\n\n"
-
     # Order instances by usage
     server_list = sorted(get_server_list(), key=lambda k: k.get('cpu_usage', -1))
 
     # Order instances by type (MM first)
     server_list = sorted(server_list, key=lambda k: (1 if k.get('software') != "MM" else -1))
+
+    msg = f"🛠 *Server disponibili: {len(server_list)}* 🛠\n\n"
 
     for server in server_list[(page*5):(page*5+5)]:
         # Check server type
@@ -118,8 +118,8 @@ def prepare_server_list(page=0):
         # Add space between servers
         msg += "\n"
 
-    msg += f"🔌 = *Jitsi*\n"
-    msg += f"📚 = *Multiparty-Meeting* (Beta)\n\n"
+    msg += f"📚 = *Multiparty-Meeting*\n"
+    msg += f"🔌 = *Jitsi*\n\n"
     msg += f"📖 *Pagina*: {page+1}"
 
     # Create a inline keyboard based on current page

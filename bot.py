@@ -60,7 +60,10 @@ def add_group(update, context):
     for member in update.message.new_chat_members:
         # Delete last msg
         if last_welcome_msg:
-            last_welcome_msg.delete()
+            try:
+                last_welcome_msg.delete()
+            except:
+                print("Can't delete last message!")
 
         # Send new!
         last_welcome_msg = update.message.reply_text(f"Ciao *{member.name}*! Benvenuto nel gruppo di supporto😁\n" \

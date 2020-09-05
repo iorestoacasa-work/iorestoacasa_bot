@@ -1,3 +1,4 @@
+import os
 import logging
 
 import telegram.error as tg_error
@@ -6,7 +7,6 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackQueryHandler, CommandHandler, Filters, MessageHandler, Updater
 
 from utils import get_server_list
-from settings import TOKEN
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -149,7 +149,7 @@ def main():
     print("Starting bot :D")
 
     # Create the Updater
-    updater = Updater(TOKEN, use_context=True)
+    updater = Updater(os.environ['TOKEN'], use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher

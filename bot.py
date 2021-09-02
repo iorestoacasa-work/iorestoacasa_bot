@@ -66,12 +66,12 @@ def add_group(update, context):
                 print("Can't delete last message!")
 
         # Send new!
-        last_welcome_msg = update.message.reply_text(f"Ciao *{member.name}*! Benvenuto nel gruppo di supporto😁\n" \
-                                                      "Se vuoi contribuire al progetto consulta questa " \
-                                                      "[pagina](https://iorestoacasa.work/voglio-contribuire.html) o le " \
+        last_welcome_msg = update.message.reply_text(f"Ciao *{member.name}*! Ti diamo il benvenuto nel gruppo di supporto😁\n" \
+                                                      "Se vuoi contribuire al progetto consulta " \
+                                                      "[questa pagina](https://iorestoacasa.work/voglio-contribuire.html) o le " \
                                                       "[issues](https://github.com/iorestoacasa-work/iorestoacasa.work/issues) " \
                                                       "presenti su GitHub.\n\nSe invece hai bisogno di aiuto scrivi pure qua " \
-                                                      "o nella chat [off-topic](https://t.me/iorestoacasaworkofftopic).\n"
+                                                      "o nella [chat off-topic](https://t.me/iorestoacasaworkofftopic).\n"
                                                       "Qualcuno ti saprà sicuramente aiutare!🛠",
                                                       parse_mode=ParseMode.MARKDOWN,
                                                       disable_web_page_preview=True)
